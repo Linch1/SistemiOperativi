@@ -4,14 +4,15 @@
 >Domande di teoria  degli esami di sistemi operativi. 
 >Aiutano per fare un recap generale o per fare un ripasso degli argomenti pricipale
 
-[File System](#file-system)
-[Files](#files)
-[Processi](#processi)
-[Sys Call](#sys-call)
-[Memory](#memory)
-[Legge di Little](#legge-di-little)
-[IPC](#ipc)
-[Allocators (SLUB/BUDDY)](#custom-allocators-slubbuddy)
+- [File System](#file-system)
+- [Files](#files)
+- [Processi](#processi)
+- [Sys Call](#sys-call)
+- [Memory](#memory)
+- [Legge di Little](#legge-di-little)
+- [IPC](#ipc)
+- [Allocators (SLUB/BUDDY)](#custom-allocators-slubbuddy)
+- [Misc](#misc)
 
 ### File System
 
@@ -399,7 +400,7 @@ foglia che lo contiene, il restante spazio verra’ sprecato. Quando un blocco v
 verra’ ricompattato con il suo buddy (se libero), risalendo fino al livello piu’ grande non occupato.
 
 
-
+### Misc
 
 A luglio 2022 è capitato:
 Una domanda su ioctl (Non mi ricordo di preciso cosa chiedesse, mi pare come si può interagire con un dispositivo input/output)
