@@ -170,24 +170,10 @@ anche informazioni sulla memoria allocata dal processo (tabella delle pagine, re
 Tale operazione e’ relativamente costosa.
 In definitiva, quindi, la creazione di un thread e’ piu’ leggera rispetto a quella di un nuovo processo.
 
-- Domanda 2018/09/11
-Che cos’e’ una syscall ? Come e’ possibile aggiungere (in linea di massima) una nuova syscall in un OS
-previsto di tale meccanismo?
-Soluzione Una syscall e’ una chiamata diretta al sistema operativo da parte di un processo user-level
-- e.g. quando viene invocata la funzione printf.
-Nel caso si volesse aggiungere una nuova syscall, essa, una volta definita, va registrata nel sistema e
-aggiunta al vettore delle syscall del sistema operativo, specificandone il numero di argomenti (ed il loro
-preciso ordine).
+
 
 ### Sys Call
 
-**Quali sono i passi necessari per aggiungere una qualsiasi syscall in un sistema operativo
-provvisto di tale meccanismo?** *(2018/01/23)*
-Una syscall e’ una chiamata diretta al sistema operativo da parte di un processo user-level
-- e.g. quando viene invocata la funzione printf.
-Una volta definita la syscall, va registrata nel sistema e aggiunta al vettore delle syscall del
-sistema operativo, specificando il numero di argomenti (ed il loro ordine) nell’altro vettore di sistema
-apposito.
 
 **Cos’e’ la Syscall Table (ST)? Come e’ possibile installare una nuova syscall in un Sistema Operativo che
 supporta tale meccanismo? Infine, in cosa differiscono la ST e l’Interrupt Vector (IV)?**(2019/01/22)
@@ -222,15 +208,6 @@ dello stack di P P , le sue risorse.
 Il parent aspetta che il child completi il suo task tramite l’istruzione wait(); quando il child finisce la sua
 esecuzione (o avviene una chiamata exit()), il parent riprende il suo flusso, come riportato in Figura 4.
 
-**Cos’e’ la tabella delle syscall? Cos’e’ invece l’interrupt vector?**(2018/02/16)
-L’interrupt vector e’ un vettore di puntatori a funzioni; queste ultime saranno le Interrupt
-Service Routine (ISR) che gestiranno i vari interrupt.
-Analogamente, la tabella delle syscall conterra’ in ogni locazione il puntatore a funzione che gestisce
-quella determinata syscall. Alla tabella verra’ associata anche un vettore contenente il numero e l’ordine
-di parametri che detta syscall richiede. Per registrare una nuova syscall, essa va registrata nel sistema
-ed aggiunta al vettore delle syscall del sistema operativo, specificando il numero di argomenti (ed il loro
-ordine) nell’altro vettore di sistema apposito.
-
 **A cosa serve la syscall ioctl? Come si puo’ configurare la comunicazione con devices a caratteri e seriali
 in Linux?**(2019/02/15)
 
@@ -243,7 +220,8 @@ baudrate, echo, ... .
 
 **Che relazione c’e’ tra una syscall, un generico interrupt e una trap? Sono la stessa cosa?**(2019/03/26)
 Che relazione c’e’ tra una syscall, un generico interrupt e una trap? Sono la stessa cosa?
-Soluzione Ovviamente le tre cose non sono la stessa cosa.
+
+Ovviamente le tre cose non sono la stessa cosa.
 Una syscall e una chiamata diretta al sistema operativo da parte di un processo user-level - e.g.
 quando viene fatta una richiesta di IO.
 Un interrupt invece e’ un segnale asincrono proveniente da hardware o software per richiedere il
@@ -428,3 +406,90 @@ Una domanda su ioctl (Non mi ricordo di preciso cosa chiedesse, mi pare come si 
 Come funziona lo slab allocator
 Che funzione ha il kernel stack nel context switch 
 Descrivere in breve i vari algoritmi di sostituzione delle pagine
+
+**Nel caso di uno scheduler preemptive round robin, quali metriche vengono influenzate dalla durata del
+quanto? Cosa migliora e cosa peggiora?**
+
+Negli schedular preemptive la CPU può essere sottratta dal processo, 
+Le metriche di valutazione degli scheduler sono 
+- Cpu utilization
+- Tempo di completamento processo
+- Processi completati per unità di tempo
+- Tempo di attesa in ready medio
+- Tempo di attesa risposta
+Nel round robin si stabilisce un quanto di tempo, una volta finito il quanto viene sottrato la cpu dal processo tramite un interrupt. Migliora il response time nel round robin ma aumenta il tempo di completamento medio dei processi.
+
+**Nelle correnti architetture di CPU la tabella delle pagine e’ su piu’ livelli. Perche’ ?**
+
+La tabella delle pagine è suddivisa su più livelli per ridurne le dimensioni in quanto nelle architetture moderne la memoria è tale da portare alla creazione di una tabella di dimensioni molto elevate, uno degli svantaggi è però l'aumento dell'EAT.
+
+
+**Illustrare il meccanismo di funzionamento della exec, enunciando i passi necessari per convertire un
+program file in un processo in memoria.** ( Gentilmente offerta da ChatGPT )
+
+Il meccanismo di funzionamento della "exec" (che è una famiglia di funzioni presenti in molte implementazioni di sistemi operativi Unix-like) consiste nei seguenti passi:
+
+1.  Verifica dell'esistenza del file eseguibile: il sistema operativo verifica che il file specificato dalla chiamata a "exec" esista e che l'utente abbia i permessi necessari per eseguirlo.
+    
+2.  Caricamento del file eseguibile: il sistema operativo carica il file eseguibile nella memoria e prepara le strutture di controllo necessarie per eseguire il processo.
+    
+3.  Decodifica dell'header del file eseguibile: il sistema operativo legge l'header del file eseguibile per determinare il formato del file (ad esempio, se è un file ELF o a.out) e altre informazioni necessarie per l'esecuzione.
+    
+4.  Allocazione della memoria per il processo: il sistema operativo assegna una porzione di memoria per il processo in esecuzione, compresi i dati del processo e la pila.
+    
+5.  Inizializzazione del contesto di esecuzione: il sistema operativo inizializza il contesto di esecuzione del processo, comprese le informazioni sulle risorse del sistema assegnate al processo (ad esempio, file descriptors aperti).
+    
+6.  Avvio dell'esecuzione: il sistema operativo avvia l'esecuzione del codice del processo a partire dall'indirizzo di inizio specificato nel file eseguibile.
+    
+7.  Esecuzione del processo: il processo viene eseguito in modo indipendente da altri processi sul sistema, fino a quando non termina o viene terminato da un segnale.
+    
+
+In sintesi, la funzione "exec" permette di convertire un file eseguibile in un processo in esecuzione, preparando tutte le risorse necessarie per l'esecuzione del processo e avviando l'esecuzione del codice del processo.
+
+
+**In cosa consiste il fenomeno del trashing? Che relazione c’e’ tra il working set di un processo e l’insorgenza
+del “trashing”?** ( Gentilmente offerta da ChatGPT )
+
+Il fenomeno del "trashing" si verifica in un sistema operativo quando il sistema è sotto pressione per la mancanza di memoria e il processore sta passando la maggior parte del tempo a gestire la sostituzione di pagine nella memoria, piuttosto che eseguire effettivamente i processi. Questo accade quando ci sono troppi processi che richiedono memoria contemporaneamente, e la memoria disponibile non è sufficiente per soddisfare le loro esigenze.
+
+Il "working set" di un processo è l'insieme di pagine di memoria che il processo utilizza attivamente in un momento dato. Se il working set di un processo è troppo grande rispetto alla memoria disponibile, c'è una probabilità elevata che si verifichi il fenomeno del "trashing". Questo perché il sistema operativo dovrà sostituire frequentemente le pagine della memoria per soddisfare le esigenze dei diversi processi, causando una sovraccarico del sistema e una riduzione delle prestazioni.
+
+In altre parole, la relazione tra il working set di un processo e l'insorgenza del "trashing" è che un working set troppo grande può contribuire a creare una situazione di sovraccarico di memoria che porta al fenomeno del "trashing". Se il sistema operativo non è in grado di gestire efficacemente la sostituzione di pagine nella memoria, i processi potrebbero subire una riduzione delle prestazioni e il sistema potrebbe diventare instabile.
+
+**Cosa succede quando si invoca una system call? Illustrare tutti i passi, dalla compilazione dei registri
+della CPU all’esecuzione della routine che implementa la syscall.** ( Gentilmente offerta da ChatGPT )
+
+Quando si invoca una "system call" (chiamata di sistema), il seguente è il processo che avviene all'interno del sistema operativo:
+
+1.  Compilazione dei registri della CPU: il processo in esecuzione compila i registri della CPU con i parametri necessari per la chiamata di sistema. Questi registri possono includere, ad esempio, l'identificatore della chiamata di sistema e gli indirizzi di memoria per i dati associati alla chiamata.
+    
+2.  Interruzione del processo: il processo in esecuzione invoca un'interruzione hardware che segnala al sistema operativo che è necessario eseguire una chiamata di sistema. Questo interrompe l'esecuzione del processo e passa il controllo al sistema operativo.
+    
+3.  Salvataggio del contesto del processo: il sistema operativo salva il contesto del processo interrotto (ad esempio, il valore dei registri della CPU e lo stato del processo) in modo che possa riprendere l'esecuzione in seguito.
+    
+4.  Individuazione della chiamata di sistema: il sistema operativo identifica la chiamata di sistema specifica invocata dal processo, utilizzando l'identificatore specificato nei registri della CPU.
+    
+5.  Esecuzione della routine che implementa la chiamata di sistema: il sistema operativo esegue la routine che implementa la chiamata di sistema specifica. Questa routine può accedere alle risorse del sistema, ad esempio i file o la memoria, e può eseguire le operazioni richieste dalla chiamata di sistema (ad esempio, leggere o scrivere un file).
+    
+6.  Ritorno al processo interrotto: una volta che la routine che implementa la chiamata di sistema è stata completata, il sistema operativo ripristina il contesto del processo interrotto e riprende l'esecuzione del processo.
+    
+
+In sintesi, quando si invoca una chiamata di sistema, il processo interrompe la sua esecuzione e passa il controllo al sistema operativo, che esegue la routine che implementa la chiamata di sistema e quindi riprende l'esecuzione del processo. Questo processo permette al processo di accedere alle risorse del sistema in modo sicuro e controllato, attraverso l'esecuzione di routine specifiche implementate dal sistema operativo.
+
+
+
+**Si descriva il funzionamento di un buddy allocator. In particolare, si illustrino
+• La relazione tra un indice dell’albero, l’indice del parent e l’indice del buddy,
+• Il meccanismo di “allocazione” di un buddy element
+• Il meccanismo di “deallocazione” di un buddy element**
+
+Un buddy allocator è un sistema di gestione della memoria che utilizza un albero di bit per tenere traccia della memoria libera e allocata. Il sistema funziona dividendo la memoria in blocchi di dimensioni crescenti e mantenendo un albero di bit per indicare quali blocchi sono attualmente allocati e quali sono disponibili.
+
+1.  La relazione tra un indice dell'albero, l'indice del parent e l'indice del buddy: l'albero di bit è organizzato in modo da avere un nodo radice che rappresenta il blocco di memoria più grande. Ogni nodo dell'albero rappresenta un blocco di memoria di una determinata dimensione e il nodo radice è diviso in due blocchi figli, che a loro volta sono divisi in altri due blocchi figli, e così via. Questo crea una gerarchia di blocchi di memoria di dimensioni crescenti. L'indice di ogni nodo rappresenta l'indirizzo del blocco di memoria associato. L'indice del parent di un nodo è l'indice del nodo padre di quel blocco e l'indice del buddy è l'indice del blocco di memoria adiacente che ha la stessa dimensione.
+    
+2.  Il meccanismo di "allocazione" di un buddy element: quando un processo richiede memoria, l'allocatore di buddy cerca il primo blocco disponibile nell'albero di bit che sia sufficientemente grande per soddisfare la richiesta. Se il primo blocco disponibile è più grande della quantità di memoria richiesta, viene diviso in due blocchi più piccoli e solo uno di essi viene allocato. Il processo che richiede la memoria riceve l'indirizzo del blocco allocato.
+    
+3.  Il meccanismo di "deallocazione" di un buddy element: quando un processo rilascia un blocco di memoria, l'allocatore di buddy contrassegna il blocco come disponibile nell'albero di bit. Se il blocco adiacente ha la stessa dimensione e anche esso è disponibile, i due blocchi vengono uniti in un unico blocco più grande. Questo processo viene ripetuto finché non si trova un blocco adiacente che non è disponibile o finché non si raggiunge la radice dell'albero.
+    
+
+In sintesi, l'allocatore di buddy utilizza un albero di bit per tenere traccia della memoria disponibile e allocata e per ottimizzare l'utilizzo della memoria, allocando solo la quantità di memoria effettivamente necessaria e riunendo blocchi di memoria liberi adiacenti per formare blocchi più grandi.
